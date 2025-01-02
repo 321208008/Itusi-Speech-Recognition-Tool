@@ -95,6 +95,87 @@ function writeString(view: DataView, offset: number, string: string): void {
   }
 }
 
+// 将音频文件转换为Base64
+async function fileToBase64(file: File | Blob): Promise<string> {
+  if (typeof window === 'undefined') {
+    throw new Error('This function can only be used in browser environment');
+  }
+  
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      // 移除Data URL前缀
+      resolve(base64.split(',')[1]);
+    };
+    reader.onerror = error => reject(error);
+    reader.readAsDataURL(file);
+  });
+}
+
+// 获取音频格式
+function getAudioFormat(file: File | Blob): string {
+  if ('type' in file) {
+    // 处理常见的音频MIME类型
+    switch (file.type.toLowerCase()) {
+      case 'audio/wav':
+      case 'audio/x-wav':
+        return 'wav';
+      case 'audio/mp3':
+      case 'audio/mpeg':
+        return 'mp3';
+      case 'audio/m4a':
+      case 'audio/x-m4a':
+      case 'audio/mp4':
+      case 'audio/x-mp4':
+        return 'm4a';
+      case 'audio/aac':
+        return 'aac';
+      case 'audio/ogg':
+        return 'ogg-opus';
+      case 'audio/webm':
+        return 'wav'; // WebM格式将被转换为WAV格式发送
+      case 'audio/amr':
+        return 'amr';
+      case 'audio/speex':
+        return 'speex';
+      case 'audio/silk':
+        return 'silk';
+      default:
+        // 如果是其他格式，尝试从文件名获取
+        if ('name' in file && file.name) {
+          const ext = file.name.split('.').pop()?.toLowerCase();
+          switch (ext) {
+            case 'wav':
+              return 'wav';
+            case 'mp3':
+              return 'mp3';
+            case 'm4a':
+              return 'm4a';
+            case 'mp4':
+              return 'm4a';
+            case 'aac':
+              return 'aac';
+            case 'ogg':
+            case 'opus':
+              return 'ogg-opus';
+            case 'webm':
+              return 'wav'; // WebM格式将被转换为WAV格式发送
+            case 'amr':
+              return 'amr';
+            case 'speex':
+              return 'speex';
+            case 'silk':
+              return 'silk';
+          }
+        }
+        // 如果无法确定格式，返回错误
+        throw new Error(`Unsupported audio format: ${file.type}`);
+    }
+  }
+  throw new Error('Unable to determine audio format');
+}
+
 // 发送语音识别请求
 export async function recognizeSpeech(audioFile: File | Blob): Promise<RecognitionResult> {
   try {
@@ -170,81 +251,4 @@ export async function recognizeSpeech(audioFile: File | Blob): Promise<Recogniti
       error: error instanceof Error ? error.message : 'Unknown error occurred',
     };
   }
-}
-
-// 将音频文件转换为Base64
-async function fileToBase64(file: File | Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      const base64 = reader.result as string;
-      // 移除Data URL前缀
-      resolve(base64.split(',')[1]);
-    };
-    reader.onerror = error => reject(error);
-  });
-}
-
-// 获取音频格式
-function getAudioFormat(file: File | Blob): string {
-  if ('type' in file) {
-    // 处理常见的音频MIME类型
-    switch (file.type.toLowerCase()) {
-      case 'audio/wav':
-      case 'audio/x-wav':
-        return 'wav';
-      case 'audio/mp3':
-      case 'audio/mpeg':
-        return 'mp3';
-      case 'audio/m4a':
-      case 'audio/x-m4a':
-      case 'audio/mp4':
-      case 'audio/x-mp4':
-        return 'm4a';
-      case 'audio/aac':
-        return 'aac';
-      case 'audio/ogg':
-        return 'ogg-opus';
-      case 'audio/webm':
-        return 'wav'; // WebM格式将被转换为WAV格式发送
-      case 'audio/amr':
-        return 'amr';
-      case 'audio/speex':
-        return 'speex';
-      case 'audio/silk':
-        return 'silk';
-      default:
-        // 如果是其他格式，尝试从文件名获取
-        if ('name' in file && file.name) {
-          const ext = file.name.split('.').pop()?.toLowerCase();
-          switch (ext) {
-            case 'wav':
-              return 'wav';
-            case 'mp3':
-              return 'mp3';
-            case 'm4a':
-              return 'm4a';
-            case 'mp4':
-              return 'm4a';
-            case 'aac':
-              return 'aac';
-            case 'ogg':
-            case 'opus':
-              return 'ogg-opus';
-            case 'webm':
-              return 'wav'; // WebM格式将被转换为WAV格式发送
-            case 'amr':
-              return 'amr';
-            case 'speex':
-              return 'speex';
-            case 'silk':
-              return 'silk';
-          }
-        }
-        // 如果无法确定格式，返回错误
-        throw new Error(`Unsupported audio format: ${file.type}`);
-    }
-  }
-  throw new Error('Unable to determine audio format');
 } 

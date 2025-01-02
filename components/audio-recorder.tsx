@@ -4,6 +4,8 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic } from 'lucide-react';
 import { useLanguage } from '@/lib/hooks/useLanguage';
+import { recognizeSpeech } from '@/lib/api/speech';
+import { toast } from 'sonner';
 
 interface AudioRecorderProps {
   onRecognitionResult: (text: string) => void;
@@ -34,23 +36,18 @@ export function AudioRecorder({ onRecognitionResult }: AudioRecorderProps) {
 
       mediaRecorder.current.onstop = async () => {
         const blob = new Blob(chunks.current, { type: 'audio/webm' });
-        const formData = new FormData();
-        formData.append('file', blob);
-
         try {
-          const response = await fetch('/api/speech/submit', {
-            method: 'POST',
-            body: formData,
-          });
-
-          if (!response.ok) {
-            throw new Error('录音识别失败');
+          const result = await recognizeSpeech(blob);
+          
+          if (result.status === 'error') {
+            throw new Error(result.error);
           }
 
-          const data = await response.json();
-          onRecognitionResult(data.text || '');
+          onRecognitionResult(result.text);
+          toast.success(t('uploadSuccess'));
         } catch (error) {
           console.error('识别错误:', error);
+          toast.error(error instanceof Error ? error.message : t('recognition.failed'));
         }
       };
 
@@ -58,6 +55,7 @@ export function AudioRecorder({ onRecognitionResult }: AudioRecorderProps) {
       setIsRecording(true);
     } catch (error) {
       console.error('录音错误:', error);
+      toast.error(t('microphone.permission.denied'));
     }
   };
 

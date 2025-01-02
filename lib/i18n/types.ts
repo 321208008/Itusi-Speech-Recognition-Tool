@@ -1,6 +1,9 @@
 export interface TranslationKeys {
   error: string;
   upload: string;
+  uploading: string;
+  uploadSuccess: string;
+  uploadError: string;
   processing: string;
   record: string;
   start: string;
