@@ -18,9 +18,9 @@
   },
   "file": {
     "type": {
-      "invalid": "Please select an audio file"
+      "invalid": "Please upload an audio file"
     }
   },
-  "upload": "Upload",
-  "processing": "Processing"
+  "upload": "Upload Audio",
+  "processing": "Processing..."
 } 

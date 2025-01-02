@@ -18,9 +18,9 @@
   },
   "file": {
     "type": {
-      "invalid": "请选择音频文件"
+      "invalid": "请上传音频文件"
     }
   },
-  "upload": "上传",
-  "processing": "处理中"
+  "upload": "上传音频",
+  "processing": "处理中..."
 } 
