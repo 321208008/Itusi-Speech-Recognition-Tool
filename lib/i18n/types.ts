@@ -25,4 +25,5 @@ export interface TranslationKeys {
   footer: {
     copyright: string;
   };
+  recording: string;
 } 

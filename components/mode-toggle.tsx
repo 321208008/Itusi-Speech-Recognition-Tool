@@ -15,24 +15,26 @@ export function ModeToggle() {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon">
-        <Sun className="h-5 w-5" />
+      <Button
+        variant="outline"
+        size="icon"
+      >
+        <Sun className="h-[1.2rem] w-[1.2rem]" />
       </Button>
     );
   }
 
   return (
     <Button
-      variant="ghost"
+      variant="outline"
       size="icon"
       onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
     >
       {theme === 'light' ? (
-        <Moon className="h-5 w-5" />
+        <Moon className="h-[1.2rem] w-[1.2rem]" />
       ) : (
-        <Sun className="h-5 w-5" />
+        <Sun className="h-[1.2rem] w-[1.2rem]" />
       )}
-      <span className="sr-only">Toggle theme</span>
     </Button>
   );
 } 

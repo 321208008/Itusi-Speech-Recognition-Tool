@@ -6,23 +6,36 @@ import { useLanguage } from '@/lib/hooks/useLanguage';
 
 export function LanguageToggle() {
   const [mounted, setMounted] = React.useState(false);
-  const { locale, setLanguage } = useLanguage();
+  const { locale, setLocale } = useLanguage();
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
   const toggleLanguage = () => {
-    setLanguage(locale === 'zh' ? 'en' : 'zh');
+    const newLocale = locale === 'zh' ? 'en' : 'zh';
+    setLocale(newLocale);
   };
+
+  // 在客户端渲染之前返回一个固定的初始状态
+  if (!mounted) {
+    return (
+      <Button
+        variant="outline"
+        size="icon"
+      >
+        中
+      </Button>
+    );
+  }
 
   return (
     <Button
-      variant="ghost"
+      variant="outline"
       size="icon"
-      onClick={mounted ? toggleLanguage : undefined}
+      onClick={toggleLanguage}
     >
-      {mounted ? (locale === 'zh' ? '中' : 'EN') : 'EN'}
+      {locale === 'zh' ? '中' : 'En'}
     </Button>
   );
 }

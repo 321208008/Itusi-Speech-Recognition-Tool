@@ -10,14 +10,19 @@ import { useLanguage } from '@/lib/hooks/useLanguage';
 import Image from 'next/image';
 
 export default function Home() {
-  const { locale, t, mounted } = useLanguage();
+  const [mounted, setMounted] = React.useState(false);
+  const { locale, t } = useLanguage();
   const [recognitionText, setRecognitionText] = React.useState('');
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleRecognitionResult = (text: string) => {
     setRecognitionText(text);
   };
 
-  // 在客户端渲染之前返回一个加载状态或默认内容
+  // 在客户端渲染之前返回一个固定的初始状态
   if (!mounted) {
     return (
       <main className="min-h-screen bg-background p-4 md:p-8">
@@ -39,7 +44,19 @@ export default function Home() {
               <ModeToggle />
             </div>
           </div>
-          {/* 其他内容保持不变 */}
+
+          <Card className="p-6">
+            <div className="flex flex-col gap-6">
+              <div className="flex gap-4">
+                <FileUpload onRecognitionResult={handleRecognitionResult} />
+                <AudioRecorder onRecognitionResult={handleRecognitionResult} />
+              </div>
+
+              <div className="min-h-[200px] rounded-lg border border-border p-4">
+                <p className="text-muted-foreground">识别结果将显示在这里...</p>
+              </div>
+            </div>
+          </Card>
         </div>
       </main>
     );

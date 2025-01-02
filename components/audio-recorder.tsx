@@ -1,122 +1,95 @@
 'use client';
 
 import * as React from 'react';
-import { Mic, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
+import { Mic } from 'lucide-react';
 import { useLanguage } from '@/lib/hooks/useLanguage';
-import { recognizeSpeech } from '@/lib/api/speech';
 
 interface AudioRecorderProps {
-  onRecognitionResult?: (text: string) => void;
+  onRecognitionResult: (text: string) => void;
 }
 
-type RecordingStatus = 'idle' | 'recording' | 'processing' | 'error';
-
 export function AudioRecorder({ onRecognitionResult }: AudioRecorderProps) {
-  const [status, setStatus] = React.useState<RecordingStatus>('idle');
-  const mediaRecorder = React.useRef<MediaRecorder | null>(null);
-  const audioChunks = React.useRef<Blob[]>([]);
-  const { toast } = useToast();
+  const [mounted, setMounted] = React.useState(false);
+  const [isRecording, setIsRecording] = React.useState(false);
   const { t } = useLanguage();
+  const mediaRecorder = React.useRef<MediaRecorder | null>(null);
+  const chunks = React.useRef<Blob[]>([]);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          channelCount: 1,         // 单声道
-          sampleRate: 16000,       // 16kHz采样率
-          sampleSize: 16,          // 16位
-          echoCancellation: true,  // 回声消除
-          noiseSuppression: true,  // 噪声抑制
-        } 
-      });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder.current = new MediaRecorder(stream);
+      chunks.current = [];
 
-      // 检查支持的 MIME 类型
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm')
-        ? 'audio/webm'
-        : MediaRecorder.isTypeSupported('audio/ogg')
-          ? 'audio/ogg'
-          : 'audio/mp4';
-
-      mediaRecorder.current = new MediaRecorder(stream, {
-        mimeType,
-        audioBitsPerSecond: 256000,
-      });
-
-      audioChunks.current = [];
-
-      mediaRecorder.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunks.current.push(event.data);
+      mediaRecorder.current.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunks.current.push(e.data);
         }
       };
 
       mediaRecorder.current.onstop = async () => {
-        const audioBlob = new Blob(audioChunks.current, { type: mimeType });
-        setStatus('processing');
+        const blob = new Blob(chunks.current, { type: 'audio/webm' });
+        const formData = new FormData();
+        formData.append('file', blob);
+
         try {
-          const result = await recognizeSpeech(audioBlob);
-          if (result.status === 'success' && result.text) {
-            onRecognitionResult?.(result.text);
-            setStatus('idle');
-          } else {
-            setStatus('error');
-            toast({
-              title: t('error'),
-              description: result.error || t('recognition.failed'),
-              variant: 'destructive',
-            });
-          }
-        } catch (error) {
-          setStatus('error');
-          toast({
-            title: t('error'),
-            description: error instanceof Error ? error.message : t('recognition.failed'),
-            variant: 'destructive',
+          const response = await fetch('/api/speech/submit', {
+            method: 'POST',
+            body: formData,
           });
+
+          if (!response.ok) {
+            throw new Error('录音识别失败');
+          }
+
+          const data = await response.json();
+          onRecognitionResult(data.text || '');
+        } catch (error) {
+          console.error('识别错误:', error);
         }
       };
 
-      // 每100ms触发一次ondataavailable事件
-      mediaRecorder.current.start(100);
-      setStatus('recording');
+      mediaRecorder.current.start();
+      setIsRecording(true);
     } catch (error) {
-      console.error('Failed to start recording:', error);
-      setStatus('error');
-      toast({
-        title: t('error'),
-        description: t('microphone.permission.denied'),
-        variant: 'destructive',
-      });
+      console.error('录音错误:', error);
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorder.current && status === 'recording') {
+    if (mediaRecorder.current && mediaRecorder.current.state !== 'inactive') {
       mediaRecorder.current.stop();
       mediaRecorder.current.stream.getTracks().forEach(track => track.stop());
+      setIsRecording(false);
     }
   };
 
-  const isRecording = status === 'recording';
-  const isProcessing = status === 'processing';
+  // 在客户端渲染之前返回一个固定的初始状态
+  if (!mounted) {
+    return (
+      <Button
+        variant="outline"
+        className="w-32"
+      >
+        <Mic className="mr-2 h-4 w-4" />
+        录音
+      </Button>
+    );
+  }
 
   return (
     <Button
-      variant={isRecording ? 'destructive' : 'default'}
-      size="icon"
+      variant="outline"
+      className="w-32"
       onClick={isRecording ? stopRecording : startRecording}
-      disabled={isProcessing}
     >
-      {isRecording ? (
-        <Square className="h-5 w-5" />
-      ) : (
-        <Mic className="h-5 w-5" />
-      )}
-      <span className="sr-only">
-        {isRecording ? t('status.recording') : t('record')}
-      </span>
+      <Mic className={`mr-2 h-4 w-4 ${isRecording ? 'text-red-500' : ''}`} />
+      {isRecording ? t('recording') : t('record')}
     </Button>
   );
 }

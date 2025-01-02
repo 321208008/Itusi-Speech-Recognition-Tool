@@ -24,5 +24,6 @@
   "upload": "上传音频",
   "processing": "处理中...",
   "start": "开始",
-  "stop": "停止"
+  "stop": "停止",
+  "recording": "录音中..."
 } 

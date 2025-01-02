@@ -24,5 +24,6 @@
   "upload": "Upload Audio",
   "processing": "Processing...",
   "start": "Start",
-  "stop": "Stop"
+  "stop": "Stop",
+  "recording": "Recording..."
 } 

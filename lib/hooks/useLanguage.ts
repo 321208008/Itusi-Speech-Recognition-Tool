@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import type { TranslationKeys } from '@/lib/i18n/types';
 import en from '@/lib/i18n/locales/en.json';
 import zh from '@/lib/i18n/locales/zh.json';
@@ -12,16 +11,21 @@ type NestedKeyOf<ObjectType extends object> = {
     : `${Key}`;
 }[keyof ObjectType & (string | number)];
 
-export function useLanguage() {
-  const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-  const [currentLocale, setCurrentLocale] = useState('zh');
+function getBrowserLanguage(): 'zh' | 'en' {
+  if (typeof window === 'undefined') return 'en';
+  
+  const browserLang = navigator.language.toLowerCase();
+  return browserLang.startsWith('zh') ? 'zh' : 'en';
+}
 
-  useEffect(() => {
-    setMounted(true);
-    const savedLocale = localStorage.getItem('locale') || 'zh';
-    setCurrentLocale(savedLocale);
-  }, []);
+export function useLanguage() {
+  const [currentLocale, setCurrentLocale] = useState(() => {
+    // 只在客户端执行
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('locale') || getBrowserLanguage();
+    }
+    return 'en';
+  });
 
   const translations = currentLocale === 'zh' ? zh : en;
 
@@ -35,10 +39,12 @@ export function useLanguage() {
   }, [translations]);
 
   const setLocale = useCallback((newLocale: 'zh' | 'en') => {
-    localStorage.setItem('locale', newLocale);
-    setCurrentLocale(newLocale);
-    router.refresh();
-  }, [router]);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('locale', newLocale);
+      setCurrentLocale(newLocale);
+      window.location.reload();
+    }
+  }, []);
 
-  return { locale: currentLocale, t, setLocale, mounted };
+  return { locale: currentLocale, t, setLocale };
 }
