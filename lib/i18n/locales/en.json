@@ -22,5 +22,7 @@
     }
   },
   "upload": "Upload Audio",
-  "processing": "Processing..."
+  "processing": "Processing...",
+  "start": "Start",
+  "stop": "Stop"
 } 

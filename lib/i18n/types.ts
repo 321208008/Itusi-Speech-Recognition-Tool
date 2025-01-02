@@ -1,9 +1,18 @@
 export interface TranslationKeys {
+  error: string;
+  upload: string;
+  processing: string;
   record: string;
+  start: string;
+  stop: string;
   status: {
     recording: string;
   };
-  error: string;
+  file: {
+    type: {
+      invalid: string;
+    };
+  };
   recognition: {
     failed: string;
     placeholder: string;
@@ -16,11 +25,4 @@ export interface TranslationKeys {
   footer: {
     copyright: string;
   };
-  file: {
-    type: {
-      invalid: string;
-    };
-  };
-  upload: string;
-  processing: string;
 } 
