@@ -26,4 +26,5 @@ export interface TranslationKeys {
     copyright: string;
   };
   recording: string;
+  theme: string;
 } 

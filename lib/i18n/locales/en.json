@@ -25,5 +25,6 @@
   "processing": "Processing...",
   "start": "Start",
   "stop": "Stop",
-  "recording": "Recording..."
+  "recording": "Recording...",
+  "theme": "Toggle theme"
 } 

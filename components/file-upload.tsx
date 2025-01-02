@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { useLanguage } from '@/lib/hooks/useLanguage';
+import { cn } from '@/lib/utils';
 
 interface FileUploadProps {
   onRecognitionResult: (text: string) => void;
@@ -46,29 +47,6 @@ export function FileUpload({ onRecognitionResult }: FileUploadProps) {
     }
   };
 
-  // 在客户端渲染之前返回一个固定的初始状态
-  if (!mounted) {
-    return (
-      <>
-        <input
-          type="file"
-          className="hidden"
-          accept="audio/*"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-        />
-        <Button
-          variant="outline"
-          className="w-32"
-          onClick={handleClick}
-        >
-          <Upload className="mr-2 h-4 w-4" />
-          上传音频
-        </Button>
-      </>
-    );
-  }
-
   return (
     <>
       <input
@@ -80,11 +58,13 @@ export function FileUpload({ onRecognitionResult }: FileUploadProps) {
       />
       <Button
         variant="outline"
-        className="w-32"
+        className={cn(
+          "w-32 flex items-center justify-center space-x-2"
+        )}
         onClick={handleClick}
       >
-        <Upload className="mr-2 h-4 w-4" />
-        {t('upload')}
+        <Upload className="w-4 h-4 inline-block" />
+        <span>{mounted ? t('upload') : '上传音频'}</span>
       </Button>
     </>
   );
