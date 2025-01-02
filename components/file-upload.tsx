@@ -10,9 +10,10 @@ import { recognizeSpeech } from '@/lib/api/speech';
 
 interface FileUploadProps {
   onRecognitionResult: (text: string) => void;
+  className?: string;
 }
 
-export function FileUpload({ onRecognitionResult }: FileUploadProps) {
+export function FileUpload({ onRecognitionResult, className }: FileUploadProps) {
   const [mounted, setMounted] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const { t } = useLanguage();
@@ -30,14 +31,12 @@ export function FileUpload({ onRecognitionResult }: FileUploadProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 检查文件类型
     if (!file.type.startsWith('audio/')) {
       toast.error(t('file.type.invalid'));
       return;
     }
 
-    // 检查文件大小
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       toast.error('文件大小超过5MB限制');
       return;
@@ -65,7 +64,7 @@ export function FileUpload({ onRecognitionResult }: FileUploadProps) {
   };
 
   return (
-    <>
+    <div className={cn("relative", className)}>
       <input
         type="file"
         className="hidden"
@@ -75,18 +74,19 @@ export function FileUpload({ onRecognitionResult }: FileUploadProps) {
       />
       <Button
         variant="outline"
+        size="lg"
         className={cn(
-          "w-32 flex items-center justify-center space-x-2",
+          "min-w-[140px] h-[42px] gap-2 font-medium transition-all",
           isLoading && "opacity-50 cursor-not-allowed"
         )}
         onClick={handleClick}
         disabled={isLoading}
       >
-        <Upload className="w-4 h-4 inline-block" />
-        <span>
+        <Upload className="w-4 h-4 transition-colors" />
+        <span className="text-sm">
           {mounted ? (isLoading ? t('uploading') : t('upload')) : '上传音频'}
         </span>
       </Button>
-    </>
+    </div>
   );
 }

@@ -6,12 +6,14 @@ import { Mic } from 'lucide-react';
 import { useLanguage } from '@/lib/hooks/useLanguage';
 import { recognizeSpeech } from '@/lib/api/speech';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface AudioRecorderProps {
   onRecognitionResult: (text: string) => void;
+  className?: string;
 }
 
-export function AudioRecorder({ onRecognitionResult }: AudioRecorderProps) {
+export function AudioRecorder({ onRecognitionResult, className }: AudioRecorderProps) {
   const [mounted, setMounted] = React.useState(false);
   const [isRecording, setIsRecording] = React.useState(false);
   const { t } = useLanguage();
@@ -53,6 +55,7 @@ export function AudioRecorder({ onRecognitionResult }: AudioRecorderProps) {
 
       mediaRecorder.current.start();
       setIsRecording(true);
+      toast.success(t('status.recording'));
     } catch (error) {
       console.error('录音错误:', error);
       toast.error(t('microphone.permission.denied'));
@@ -67,27 +70,38 @@ export function AudioRecorder({ onRecognitionResult }: AudioRecorderProps) {
     }
   };
 
-  // 在客户端渲染之前返回一个固定的初始状态
   if (!mounted) {
     return (
       <Button
         variant="outline"
-        className="w-32"
+        size="lg"
+        className="min-w-[140px] h-[42px]"
       >
-        <Mic className="mr-2 h-4 w-4" />
-        录音
+        <Mic className="w-4 h-4 mr-2" />
+        <span className="text-sm">录音</span>
       </Button>
     );
   }
 
   return (
-    <Button
-      variant="outline"
-      className="w-32"
-      onClick={isRecording ? stopRecording : startRecording}
-    >
-      <Mic className={`mr-2 h-4 w-4 ${isRecording ? 'text-red-500' : ''}`} />
-      {isRecording ? t('recording') : t('record')}
-    </Button>
+    <div className={cn("relative", className)}>
+      <Button
+        variant="outline"
+        size="lg"
+        className={cn(
+          "min-w-[140px] h-[42px] gap-2 font-medium transition-all",
+          isRecording && "border-red-500 hover:border-red-500"
+        )}
+        onClick={isRecording ? stopRecording : startRecording}
+      >
+        <Mic className={cn(
+          "w-4 h-4 transition-colors",
+          isRecording && "text-red-500"
+        )} />
+        <span className="text-sm">
+          {isRecording ? t('recording') : t('record')}
+        </span>
+      </Button>
+    </div>
   );
 }
