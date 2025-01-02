@@ -1,34 +1,44 @@
 'use client';
 
-import { create } from 'zustand';
-import type { TranslationKeys } from '../i18n/types';
-import en from '../i18n/locales/en.json';
-import zh from '../i18n/locales/zh.json';
+import { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import type { TranslationKeys } from '@/lib/i18n/types';
+import en from '@/lib/i18n/locales/en.json';
+import zh from '@/lib/i18n/locales/zh.json';
 
-type Language = 'en' | 'zh';
+type NestedKeyOf<ObjectType extends object> = {
+  [Key in keyof ObjectType & (string | number)]: ObjectType[Key] extends object
+    ? `${Key}.${NestedKeyOf<ObjectType[Key]>}`
+    : `${Key}`;
+}[keyof ObjectType & (string | number)];
 
-interface LanguageState {
-  locale: Language;
-  translations: Record<Language, TranslationKeys>;
-  t: (key: keyof TranslationKeys) => string;
-  setLanguage: (language: Language) => void;
-}
+export function useLanguage() {
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  const [currentLocale, setCurrentLocale] = useState('zh');
 
-export const useLanguage = create<LanguageState>((set, get) => ({
-  locale: 'en',
-  translations: {
-    en,
-    zh,
-  },
-  t: (key) => {
-    const state = get();
-    const translation = state.translations[state.locale];
+  useEffect(() => {
+    setMounted(true);
+    const savedLocale = localStorage.getItem('locale') || 'zh';
+    setCurrentLocale(savedLocale);
+  }, []);
+
+  const translations = currentLocale === 'zh' ? zh : en;
+
+  const t = useCallback((key: NestedKeyOf<TranslationKeys>) => {
     const keys = key.split('.');
-    let value: any = translation;
+    let value: any = translations;
     for (const k of keys) {
       value = value[k];
     }
     return value || key;
-  },
-  setLanguage: (language) => set({ locale: language }),
-}));
+  }, [translations]);
+
+  const setLocale = useCallback((newLocale: 'zh' | 'en') => {
+    localStorage.setItem('locale', newLocale);
+    setCurrentLocale(newLocale);
+    router.refresh();
+  }, [router]);
+
+  return { locale: currentLocale, t, setLocale, mounted };
+}
