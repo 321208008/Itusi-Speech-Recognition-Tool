@@ -1,0 +1,26 @@
+{
+  "record": "Record",
+  "status": {
+    "recording": "Recording"
+  },
+  "error": "Error",
+  "recognition": {
+    "failed": "Recognition failed",
+    "placeholder": "Recognition results will be displayed here..."
+  },
+  "microphone": {
+    "permission": {
+      "denied": "Please allow microphone access"
+    }
+  },
+  "footer": {
+    "copyright": "Itusi Speech Recognition Tool. All rights reserved."
+  },
+  "file": {
+    "type": {
+      "invalid": "Please select an audio file"
+    }
+  },
+  "upload": "Upload",
+  "processing": "Processing"
+} 

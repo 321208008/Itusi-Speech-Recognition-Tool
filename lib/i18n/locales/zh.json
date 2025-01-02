@@ -1,0 +1,26 @@
+{
+  "record": "录音",
+  "status": {
+    "recording": "正在录音"
+  },
+  "error": "错误",
+  "recognition": {
+    "failed": "识别失败",
+    "placeholder": "识别结果将显示在这里..."
+  },
+  "microphone": {
+    "permission": {
+      "denied": "请允许使用麦克风"
+    }
+  },
+  "footer": {
+    "copyright": "Itusi 语音识别工具。保留所有权利。"
+  },
+  "file": {
+    "type": {
+      "invalid": "请选择音频文件"
+    }
+  },
+  "upload": "上传",
+  "processing": "处理中"
+} 
