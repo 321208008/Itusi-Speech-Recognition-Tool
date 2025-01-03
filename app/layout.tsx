@@ -1,19 +1,16 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { Providers } from './providers';
-import { Toaster } from '@/components/ui/toaster';
+import { ThemeProvider } from '@/components/theme-provider';
+import { Toaster } from '@/components/ui/sonner';
 import { Footer } from '@/components/footer';
-import { cn } from '@/lib/utils';
+import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: {
-    default: 'Speech Recognition Tool',
-    template: '%s | Speech Recognition Tool',
-  },
-  description: 'A powerful speech recognition tool for real-time transcription and audio processing.',
+  title: 'Speech Recognition Tool',
+  description: 'A powerful speech recognition tool for real-time transcription',
   icons: {
     icon: [
       {
@@ -31,12 +28,27 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9535069756501112"
+          crossOrigin="anonymous"
+          strategy="lazyOnload"
+        />
+      </head>
       <body className={inter.className}>
-        <Providers attribute="class" defaultTheme="system" enableSystem>
-          {children}
-          <Toaster />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <main className="min-h-screen flex flex-col">
+            {children}
+          </main>
           <Footer />
-        </Providers>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
